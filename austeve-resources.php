@@ -22,6 +22,8 @@ class AUSteve_Resources_CPT {
 		add_filter('manage_austeve-resources_posts_columns', array($this, 'alter_admin_columns_head') );
 
 		add_action('manage_austeve-resources_posts_custom_column', array($this, 'alter_admin_columns_content'), 10, 2 );
+
+		add_action('pre_get_posts', array($this, 'always_get_all_resources') );
 	}
 
 	function register_post_type() {
@@ -123,6 +125,16 @@ class AUSteve_Resources_CPT {
       }
     }
 
+    function always_get_all_resources($query) {
+    	//if querying a resource category, get all resources
+    	if (!is_admin() && $query->get('resource-category') != null)
+    	{
+    		$query->set('posts_per_page', -1);
+    		//error_log('PGP altered: '.print_r($query, true));
+    	}
+    	return $query;
+    }
+
 	function alter_admin_columns_head($defaults) {
 		$res = array_slice($defaults, 0, 2, true) +
 		    array("resource-category" => "Category") +
@@ -132,7 +144,6 @@ class AUSteve_Resources_CPT {
 		unset($defaults['categories']);
 	    return $defaults;
 	}
-
 	 
 	function alter_admin_columns_content($column_name, $post_ID) {
 	    if ($column_name == 'resource-category') {
