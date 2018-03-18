@@ -18,6 +18,10 @@ class AUSteve_Resources_CPT {
 		add_action( 'init', array($this, 'register_category_taxonomy') );
 
 		add_action( 'template_redirect', array($this, 'redirect_singular_posts') );
+
+		add_filter('manage_austeve-resources_posts_columns', array($this, 'alter_admin_columns_head') );
+
+		add_action('manage_austeve-resources_posts_custom_column', array($this, 'alter_admin_columns_content'), 10, 2 );
 	}
 
 	function register_post_type() {
@@ -46,7 +50,7 @@ class AUSteve_Resources_CPT {
 			// Features this CPT supports in Post Editor
 			'supports'            => array( 'title', 'editor', 'author', 'revisions', ),
 			// You can associate this CPT with a taxonomy or custom taxonomy. 
-			'taxonomies'          => array( 'category' ),
+			'taxonomies'          => array( '' ),
 			/* A hierarchical CPT is like Pages and can have
 			* Parent and child items. A non-hierarchical CPT
 			* is like Posts.
@@ -118,6 +122,31 @@ class AUSteve_Resources_CPT {
         exit;
       }
     }
+
+	function alter_admin_columns_head($defaults) {
+		$res = array_slice($defaults, 0, 2, true) +
+		    array("resource-category" => "Category") +
+		    array_slice($defaults, 2, count($defaults) - 1, true) ;
+		$defaults = $res;
+		//Remove the old date column
+		unset($defaults['categories']);
+	    return $defaults;
+	}
+
+	 
+	function alter_admin_columns_content($column_name, $post_ID) {
+	    if ($column_name == 'resource-category') {
+			$term_args = array('orderby' => 'name', 'order' => 'ASC', 'fields' => 'names');
+	    	$term_list = wp_get_post_terms($post_ID, 'resource-category', $term_args);
+	    	if (count($term_list) > 1)
+				echo implode(", ", $term_list);
+			else if (count($term_list) > 0)
+				echo $term_list[0];
+	    }
+	}
+
+
+
 
 }
 
