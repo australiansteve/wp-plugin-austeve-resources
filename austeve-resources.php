@@ -130,6 +130,8 @@ class AUSteve_Resources_CPT {
     	if (!is_admin() && $query->get('resource-category') != null)
     	{
     		$query->set('posts_per_page', -1);
+    		$query->set('orderby', 'title');//<-- Our custom ordering!
+    		$query->set('order', 'ASC');
     		//error_log('PGP altered: '.print_r($query, true));
     	}
     	return $query;
